@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Waste Classifier</title>
+    <style>
+        #webcam, #canvas { display: block; margin: 10px auto; }
+        #result { margin: 20px; font-size: 18px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Upload Image or Use Webcam</h1>
+
+    <!-- File Upload -->
+    <form id="uploadForm">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Predict</button>
+    </form>
+
+    <!-- Webcam -->
+    <video id="webcam" width="640" height="480" autoplay></video>
+    <button id="captureBtn">Capture & Predict</button>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+    <!-- Results -->
+    <div id="result"></div>
+    <img id="preview" style="max-width: 500px; display: none;">
+
+    <script src="static/script.js"></script>
+</body>
+</html>
