@@ -5,14 +5,13 @@ from tensorflow.keras.models import load_model
 from PIL import Image
 import time
 import base64
-
+import os
 
 # --- Background Setup ---
 def get_base64(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
     return base64.b64encode(data).decode()
-
 
 def set_background(png_file):
     bin_str = get_base64(png_file)
@@ -33,7 +32,6 @@ def set_background(png_file):
     </style>
     ''' % bin_str
     st.markdown(page_bg_img, unsafe_allow_html=True)
-
 
 # Set your background image
 set_background('assets/background.png')
@@ -82,41 +80,69 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
-# --- Model Loading ---
+# --- Load Classifier Model ---
 @st.cache_resource
 def load_my_model():
     progress_bar = st.progress(0)
     status_text = st.empty()
-
     for i in range(100):
         time.sleep(0.01)
         progress_bar.progress(i + 1)
         status_text.text(f"Loading model... {i + 1}%")
-
     model = load_model('model.h5')
     progress_bar.empty()
     status_text.empty()
     return model
 
-
 model = load_my_model()
 
+# --- Load Object Detector (MobileNet SSD) ---
+@st.cache_resource
+def load_detector():
+    prototxt = "ssd/MobileNetSSD_deploy.prototxt.txt"
+    model_path = "ssd/MobileNetSSD_deploy.caffemodel"
+    if not os.path.exists(prototxt) or not os.path.exists(model_path):
+        st.error("SSD model files not found. Please add them in 'ssd/' folder.")
+    net = cv2.dnn.readNetFromCaffe(prototxt, model_path)
+    return net
+
+detector = load_detector()
 
 # --- Prediction Function ---
-def predict(image):
-    img = cv2.resize(image, (224, 224))
-    img = img / 255.0
-    pred = model.predict(np.expand_dims(img, axis=0))
-    confidence = float(np.max(pred))
-    classes = ['Biodegradable ♻️', 'Non-Biodegradable 🚯']
+def detect_and_classify(image):
+    h, w = image.shape[:2]
+    blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843, (300, 300), 127.5)
+    detector.setInput(blob)
+    detections = detector.forward()
 
-    # No object detection logic
-    if confidence < 0.7:  # threshold
-        return "No Object Found 🚫", confidence
-    else:
-        return classes[np.argmax(pred)], confidence
+    results = []
+    for i in range(detections.shape[2]):
+        confidence_det = detections[0, 0, i, 2]
+        if confidence_det > 0.5:  # object detected
+            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            (startX, startY, endX, endY) = box.astype("int")
 
+            # Crop object for classification
+            obj_crop = image[startY:endY, startX:endX]
+            if obj_crop.size == 0:
+                continue
+
+            img_resized = cv2.resize(obj_crop, (224, 224)) / 255.0
+            pred = model.predict(np.expand_dims(img_resized, axis=0))
+            classes = ['Biodegradable ♻️', 'Non-Biodegradable 🚯']
+            label = classes[np.argmax(pred)]
+            conf_cls = float(np.max(pred))
+
+            # Draw bounding box
+            cv2.rectangle(image, (startX, startY), (endX, endY), (0, 255, 0), 2)
+            cv2.putText(image, f"{label} {conf_cls*100:.1f}%", (startX, startY - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+            results.append((label, conf_cls))
+
+    if not results:
+        return image, [("No Object Found 🚫", 0.0)]
+    return image, results
 
 # --- App Interface ---
 st.title("🌱 Smart Waste Classifier")
@@ -126,60 +152,47 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Input Selection
 option = st.radio("", ("📁 Upload Image", "📷 Use Webcam"), horizontal=True)
 
 if option == "📁 Upload Image":
     uploaded_file = st.file_uploader("", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
-
     if uploaded_file is not None:
-        with st.spinner('Processing image...'):
-            image = np.array(Image.open(uploaded_file))
-            st.image(image, caption='Uploaded Image', use_container_width=True)
-
-            if st.button('🔍 Analyze Waste', use_container_width=True):
-                with st.spinner('Classifying...'):
-                    time.sleep(0.5)
-                    label, confidence = predict(image)
-
+        image = np.array(Image.open(uploaded_file))
+        if st.button('🔍 Analyze Waste', use_container_width=True):
+            with st.spinner('Detecting and Classifying...'):
+                output_img, preds = detect_and_classify(image.copy())
+                st.image(output_img, caption='Detection Result', use_container_width=True)
+                for label, conf in preds:
                     st.markdown(f"""
                     <div class='prediction-box'>
-                        <h3 style='color:#2e8b57;'> {label}</h3>
-                        <p style='color:#333;'>Confidence:</p>
+                        <h3>{label}</h3>
+                        <p>Confidence:</p>
                         <div class='confidence-bar'>
-                            <div class='confidence-fill' style='width:{confidence * 100}%'></div>
+                            <div class='confidence-fill' style='width:{conf * 100}%'></div>
                         </div>
-                        <p style='color:#333;'>{confidence:.2%}</p>
+                        <p>{conf:.2%}</p>
                     </div>
                     """, unsafe_allow_html=True)
 
-else:  # Webcam option
-    st.markdown("### Smile for the planet! 🌍")
+else:
     picture = st.camera_input("", label_visibility="collapsed")
-
     if picture:
-        with st.spinner('Processing capture...'):
-            image = np.array(Image.open(picture))
-
-            if st.button('🔍 Analyze Waste', use_container_width=True):
-                with st.spinner('Classifying...'):
-                    time.sleep(0.5)
-                    label, confidence = predict(image)
-
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.image(image, caption='Captured Image', use_container_width=True)
-                    with col2:
-                        st.markdown(f"""
-                        <div class='prediction-box'>
-                            <h3 style='color:#2e8b57;'>Prediction: {label}</h3>
-                            <p style='color:#333;'>Confidence:</p>
-                            <div class='confidence-bar'>
-                                <div class='confidence-fill' style='width:{confidence * 100}%'></div>
-                            </div>
-                            <p style='color:#333;'>{confidence:.2%}</p>
+        image = np.array(Image.open(picture))
+        if st.button('🔍 Analyze Waste', use_container_width=True):
+            with st.spinner('Detecting and Classifying...'):
+                output_img, preds = detect_and_classify(image.copy())
+                st.image(output_img, caption='Detection Result', use_container_width=True)
+                for label, conf in preds:
+                    st.markdown(f"""
+                    <div class='prediction-box'>
+                        <h3>{label}</h3>
+                        <p>Confidence:</p>
+                        <div class='confidence-bar'>
+                            <div class='confidence-fill' style='width:{conf * 100}%'></div>
                         </div>
-                        """, unsafe_allow_html=True)
+                        <p>{conf:.2%}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 # Footer
 st.markdown("---")
