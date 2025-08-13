@@ -110,6 +110,11 @@ detector = load_detector()
 
 # --- Prediction Function ---
 def detect_and_classify(image):
+    # Ensure image is in BGR format for OpenCV
+    if image.shape[2] == 3 and image.dtype != np.uint8:
+        image = image.astype(np.uint8)
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
     h, w = image.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843, (300, 300), 127.5)
     detector.setInput(blob)
@@ -157,11 +162,12 @@ option = st.radio("", ("📁 Upload Image", "📷 Use Webcam"), horizontal=True)
 if option == "📁 Upload Image":
     uploaded_file = st.file_uploader("", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
     if uploaded_file is not None:
-        image = np.array(Image.open(uploaded_file))
+        pil_image = Image.open(uploaded_file).convert("RGB")
+        image = np.array(pil_image)  # RGB format
         if st.button('🔍 Analyze Waste', use_container_width=True):
             with st.spinner('Detecting and Classifying...'):
                 output_img, preds = detect_and_classify(image.copy())
-                st.image(output_img, caption='Detection Result', use_container_width=True)
+                st.image(cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB), caption='Detection Result', use_container_width=True)
                 for label, conf in preds:
                     st.markdown(f"""
                     <div class='prediction-box'>
@@ -177,11 +183,12 @@ if option == "📁 Upload Image":
 else:
     picture = st.camera_input("", label_visibility="collapsed")
     if picture:
-        image = np.array(Image.open(picture))
+        pil_image = Image.open(picture).convert("RGB")
+        image = np.array(pil_image)  # RGB format
         if st.button('🔍 Analyze Waste', use_container_width=True):
             with st.spinner('Detecting and Classifying...'):
                 output_img, preds = detect_and_classify(image.copy())
-                st.image(output_img, caption='Detection Result', use_container_width=True)
+                st.image(cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB), caption='Detection Result', use_container_width=True)
                 for label, conf in preds:
                     st.markdown(f"""
                     <div class='prediction-box'>
