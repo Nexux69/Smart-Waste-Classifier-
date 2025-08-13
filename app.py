@@ -108,8 +108,14 @@ def predict(image):
     img = cv2.resize(image, (224, 224))
     img = img / 255.0
     pred = model.predict(np.expand_dims(img, axis=0))
+    confidence = float(np.max(pred))
     classes = ['Biodegradable ♻️', 'Non-Biodegradable 🚯']
-    return classes[np.argmax(pred)], float(np.max(pred))
+
+    # No object detection logic
+    if confidence < 0.7:  # threshold
+        return "No Object Found 🚫", confidence
+    else:
+        return classes[np.argmax(pred)], confidence
 
 
 # --- App Interface ---
@@ -129,7 +135,7 @@ if option == "📁 Upload Image":
     if uploaded_file is not None:
         with st.spinner('Processing image...'):
             image = np.array(Image.open(uploaded_file))
-            st.image(image, caption='Uploaded Image', use_container_width=True)  # Changed here
+            st.image(image, caption='Uploaded Image', use_container_width=True)
 
             if st.button('🔍 Analyze Waste', use_container_width=True):
                 with st.spinner('Classifying...'):
@@ -162,7 +168,7 @@ else:  # Webcam option
 
                     col1, col2 = st.columns(2)
                     with col1:
-                        st.image(image, caption='Captured Image', use_container_width=True)  # Changed here
+                        st.image(image, caption='Captured Image', use_container_width=True)
                     with col2:
                         st.markdown(f"""
                         <div class='prediction-box'>
