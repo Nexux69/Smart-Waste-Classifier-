@@ -99,7 +99,7 @@ model = load_my_model()
 # --- Load Object Detector (MobileNet SSD) ---
 @st.cache_resource
 def load_detector():
-    prototxt = "ssd/deploy.prototxt.txt"
+    prototxt = "ssd/deploy.prototxt"
     model_path = "ssd/mobilenet_iter_73000.caffemodel"
     if not os.path.exists(prototxt) or not os.path.exists(model_path):
         st.error("SSD model files not found. Please add them in 'ssd/' folder.")
