@@ -108,13 +108,8 @@ def load_detector():
 
 detector = load_detector()
 
-# --- Prediction Function ---
+# --- Prediction Function (SSD + Classifier) ---
 def detect_and_classify(image):
-    # Ensure image is in BGR format for OpenCV
-    if image.shape[2] == 3 and image.dtype != np.uint8:
-        image = image.astype(np.uint8)
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
     h, w = image.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843, (300, 300), 127.5)
     detector.setInput(blob)
@@ -127,7 +122,6 @@ def detect_and_classify(image):
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
 
-            # Crop object for classification
             obj_crop = image[startY:endY, startX:endX]
             if obj_crop.size == 0:
                 continue
@@ -138,7 +132,6 @@ def detect_and_classify(image):
             label = classes[np.argmax(pred)]
             conf_cls = float(np.max(pred))
 
-            # Draw bounding box
             cv2.rectangle(image, (startX, startY), (endX, endY), (0, 255, 0), 2)
             cv2.putText(image, f"{label} {conf_cls*100:.1f}%", (startX, startY - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
@@ -159,36 +152,40 @@ st.markdown("""
 
 option = st.radio("", ("📁 Upload Image", "📷 Use Webcam"), horizontal=True)
 
+# --- Upload Image Mode (Direct Classification) ---
 if option == "📁 Upload Image":
     uploaded_file = st.file_uploader("", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
     if uploaded_file is not None:
-        pil_image = Image.open(uploaded_file).convert("RGB")
-        image = np.array(pil_image)  # RGB format
+        image = np.array(Image.open(uploaded_file))
         if st.button('🔍 Analyze Waste', use_container_width=True):
-            with st.spinner('Detecting and Classifying...'):
-                output_img, preds = detect_and_classify(image.copy())
-                st.image(cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB), caption='Detection Result', use_container_width=True)
-                for label, conf in preds:
-                    st.markdown(f"""
-                    <div class='prediction-box'>
-                        <h3>{label}</h3>
-                        <p>Confidence:</p>
-                        <div class='confidence-bar'>
-                            <div class='confidence-fill' style='width:{conf * 100}%'></div>
-                        </div>
-                        <p>{conf:.2%}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
+            with st.spinner('Classifying...'):
+                img_resized = cv2.resize(image, (224, 224)) / 255.0
+                pred = model.predict(np.expand_dims(img_resized, axis=0))
+                classes = ['Biodegradable ♻️', 'Non-Biodegradable 🚯']
+                label = classes[np.argmax(pred)]
+                conf_cls = float(np.max(pred))
 
+                st.image(image, caption='Uploaded Image', use_container_width=True)
+                st.markdown(f"""
+                <div class='prediction-box'>
+                    <h3>{label}</h3>
+                    <p>Confidence:</p>
+                    <div class='confidence-bar'>
+                        <div class='confidence-fill' style='width:{conf_cls * 100}%'></div>
+                    </div>
+                    <p>{conf_cls:.2%}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+# --- Webcam Mode (SSD + Classifier) ---
 else:
     picture = st.camera_input("", label_visibility="collapsed")
     if picture:
-        pil_image = Image.open(picture).convert("RGB")
-        image = np.array(pil_image)  # RGB format
+        image = np.array(Image.open(picture))
         if st.button('🔍 Analyze Waste', use_container_width=True):
             with st.spinner('Detecting and Classifying...'):
                 output_img, preds = detect_and_classify(image.copy())
-                st.image(cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB), caption='Detection Result', use_container_width=True)
+                st.image(output_img, caption='Detection Result', use_container_width=True)
                 for label, conf in preds:
                     st.markdown(f"""
                     <div class='prediction-box'>
@@ -201,7 +198,7 @@ else:
                     </div>
                     """, unsafe_allow_html=True)
 
-# Footer
+# --- Footer ---
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #666; font-size: small;'>
