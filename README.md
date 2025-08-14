@@ -18,6 +18,12 @@ Smart Waste Classifier is a machine learning project designed to automate the cl
 ## Demo
 
 *Add screenshots or GIFs showing the notebook and classification results here if available.*
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9ad7421b-cf56-488b-b46b-bfe1b4e64a2f" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6b3e4a7e-5309-4ced-9148-6558ef7f9df3" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/496e4777-f814-41bf-8e82-a46ecb8943ca" />
+
+
+
 
 ## Getting Started
 
