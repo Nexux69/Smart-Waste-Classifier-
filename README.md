@@ -1,16 +1,16 @@
 # Smart Waste Classifier
 
-![Smart Waste Classifier Banner](https://img.shields.io/badge/Machine%20Learning-Jupyter%20Notebook-blue)
+![Smart Waste Classifier Banner](https://img.shields.io/badge/Machine%20Learning-Google%20Colab-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Overview
 
-Smart Waste Classifier is a machine learning project designed to automate the classification of waste materials into appropriate categories (e.g., recyclable, organic, landfill) using image recognition techniques. Built primarily with Jupyter Notebook, this project aims to contribute to efficient waste management and environmental sustainability.
+Smart Waste Classifier is a machine learning project designed to automate the classification of waste materials into appropriate categories (e.g., recyclable, organic, landfill) using image recognition techniques. Built to run seamlessly on Google Colab, this project aims to contribute to efficient waste management and environmental sustainability.
 
 ## Features
 
 - **Automated Waste Classification:** Uses computer vision to identify and sort waste items.
-- **Jupyter Notebooks:** All code and experiments are presented as easy-to-follow notebooks.
+- **Google Colab Notebooks:** All code and experiments are provided as interactive Colab notebooks—no local setup required.
 - **Custom Dataset:** Trained on a dataset of common waste images (customize as needed).
 - **Model Evaluation & Visualization:** Includes metrics, confusion matrices, and visual outputs.
 - **Easy to Extend:** Designed for further research and improvements.
@@ -23,45 +23,22 @@ Smart Waste Classifier is a machine learning project designed to automate the cl
 
 ### Prerequisites
 
-- Python 3.7+
-- Jupyter Notebook
-- Common ML/Data Science libraries (see below)
+- A Google account for accessing Google Colab
+- Basic familiarity with Python and machine learning
 
-### Installation
+### Usage
 
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/Nexux69/Smart-Waste-Classifier-.git
-   cd Smart-Waste-Classifier-
-   ```
+1. **Open in Google Colab:**  
+   Click the badge or link below to launch the main notebook in Google Colab.  
+   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](URL_TO_YOUR_NOTEBOOK)
 
-2. **Install Dependencies:**
-   You can use `pip` or `conda` to install the required libraries. The primary dependencies include:
-   - numpy
-   - pandas
-   - matplotlib
-   - scikit-learn
-   - tensorflow / keras
-   - opencv-python
+2. **Prepare the Dataset:**  
+   Upload your images as described in the notebook or connect to your dataset source.
 
-   ```bash
-   pip install -r requirements.txt
-   ```
-   *(If a `requirements.txt` is not present, install manually as above.)*
-
-3. **Launch Jupyter Notebook:**
-   ```bash
-   jupyter notebook
-   ```
-   Open the main notebook file (e.g., `SmartWasteClassifier.ipynb`).
-
-## Usage
-
-1. **Prepare the Dataset:**  
-   Ensure your images are organized as described in the notebook or project docs.
-2. **Run the Notebook:**  
+3. **Run the Notebook:**  
    Execute each cell sequentially to train, validate, and test the model.
-3. **Customize & Experiment:**  
+
+4. **Customize & Experiment:**  
    Try different models, datasets, or preprocessing techniques as desired.
 
 ## Project Structure
@@ -69,7 +46,7 @@ Smart Waste Classifier is a machine learning project designed to automate the cl
 ```
 Smart-Waste-Classifier-/
 ├── data/              # Dataset folder (images, labels)
-├── notebooks/         # Jupyter Notebooks
+├── notebooks/         # Colab Notebooks
 ├── models/            # Saved models/checkpoints
 ├── utils/             # Helper scripts
 ├── README.md
@@ -93,4 +70,3 @@ This project is licensed under the MIT License.
 ---
 
 *For any questions or collaborations, please contact [Nexux69](https://github.com/Nexux69).*
-
