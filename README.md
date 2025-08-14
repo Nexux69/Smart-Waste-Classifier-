@@ -37,10 +37,10 @@ Smart Waste Classifier is a machine learning project designed to automate the cl
 
 1. **Open in Google Colab:**  
    Click the badge or link below to launch the main notebook in Google Colab.  
-   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](URL_TO_YOUR_NOTEBOOK)
+   [![Open In Colab](https://colab.research.google.com/drive/1zV2d7KwCsjsqBlAawwyhhYXHh1CT1J_D)](URL_TO_YOUR_NOTEBOOK)
 
 2. **Prepare the Dataset:**  
-   Upload your images as described in the notebook or connect to your dataset source.
+   https://www.kaggle.com/datasets/niggasus/bio-degradable-and-non-bio-degradable-waste
 
 3. **Run the Notebook:**  
    Execute each cell sequentially to train, validate, and test the model.
@@ -65,9 +65,6 @@ Smart-Waste-Classifier-/
 Contributions, issues, and feature requests are welcome!  
 Feel free to check [issues page](https://github.com/Nexux69/Smart-Waste-Classifier-/issues) or submit a pull request.
 
-## License
-
-This project is licensed under the MIT License.
 
 ## Acknowledgements
 
