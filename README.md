@@ -22,9 +22,11 @@ Smart Waste Classifier is a machine learning project designed to automate the cl
 <img width="1919" height="995" alt="image" src="https://github.com/user-attachments/assets/0be43a76-1040-4520-b187-920f9c8f31d2" />
 
 
+## Live Demo
 
+Experience the Smart Waste Classifier in action on the web:
 
-
+👉 [Smart Waste Classifier Web App](https://smartwastee.streamlit.app/)
 
 ## Getting Started
 
